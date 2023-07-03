@@ -2,6 +2,7 @@ rm(list = ls()) # remove all variables from environment
 cat("\014") # clean console
 # import libraries
 library(readr)
+library(dplyr)
 
 #set working directory
 setwd("C:/Users/Oz/Documents/Empathy And Acceptance/empathy-and-acceptance/")
@@ -11,4 +12,13 @@ beginning<-read_tsv('rawdata\\Beginning Survey_July 2, 2023_04.49.tsv', locale =
 ending<-readr::read_tsv("rawdata\\Ending Survey_July 2, 2023_04.49.tsv", locale = locale(encoding = "UTF-16"))
 daily<-readr::read_tsv("rawdata\\daily survey_July 2, 2023_04.48.tsv", locale = locale(encoding = "UTF-16"))
 
-#
+# Remove duplicate ID except the last occurrence & people who did not finish.
+beginning_unique <- beginning %>%
+  group_by(ID) %>%
+  filter(row_number() == n() & Progress == 100)
+
+ending_unique <- ending %>%
+  group_by(ID) %>%
+  filter(row_number() == n() & Progress == 100)
+  
+
