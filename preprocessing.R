@@ -51,12 +51,48 @@ beginning_ders <- beginning_ders %>%
 # Convert to numeric
 ending_iri <- ending_ders %>%
   mutate(across(starts_with("EmpathicConcern"), as.numeric))
-# Perspective Taking: 3(3), 8(8), 11(11), 15(15R), -(21), -(25), -(28)
 
+beginning_iri <- beginning_ders %>%
+  mutate(across(starts_with("EmpathicConcern"), as.numeric))
+# Perspective Taking: 3(3R), 8(8), 11(11), 15(15R), -(21), -(25), -(28)
+ending_iri <- ending_iri %>%
+  mutate(IRI_PT = recode(EmpathicConcern_3, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+           EmpathicConcern_8 + EmpathicConcern_11 +
+           recode(EmpathicConcern_15, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+
+beginning_iri <- beginning_iri %>%
+  mutate(IRI_PT = recode(EmpathicConcern_3, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+           EmpathicConcern_8 + EmpathicConcern_11 +
+           recode(EmpathicConcern_15, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
 # Fantasy Scale: 1(1), 5(5), 7(7R), 12(12R), 16(16), -(23), -(26)
+ending_iri <- ending_iri %>%
+  mutate(IRI_FC = recode(EmpathicConcern_7, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+           EmpathicConcern_1 + EmpathicConcern_5 + EmpathicConcern_16 +
+           recode(EmpathicConcern_12, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
 
-# Emphatic Concern: 2(2), 4(4), 9(9), 14(14), -(18R), -(20), -(22)
+beginning_iri <- beginning_iri %>%
+  mutate(IRI_FC = recode(EmpathicConcern_7, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+           EmpathicConcern_1 + EmpathicConcern_5 + EmpathicConcern_16 +
+           recode(EmpathicConcern_12, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+# Emphatic Concern: 2(2), 4(4R), 9(9), 14(14), -(18R), -(20), -(22)
+ending_iri <- ending_iri %>%
+  mutate(IRI_EC = recode(EmpathicConcern_4, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+           EmpathicConcern_2 + EmpathicConcern_9 + EmpathicConcern_14)
 
+beginning_iri <- beginning_iri %>%
+  mutate(IRI_EC = recode(EmpathicConcern_4, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+           EmpathicConcern_2 + EmpathicConcern_9 + EmpathicConcern_14)
 # Personal Distress: 6(6), 10(10), 13(13R), -(17), -(19R), -(24), -(27)
+ending_iri <- ending_iri %>%
+  mutate(IRI_PD = recode(EmpathicConcern_13, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+           EmpathicConcern_6 + EmpathicConcern_10)
 
+beginning_iri <- beginning_iri %>%
+  mutate(IRI_PD = recode(EmpathicConcern_13, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+           EmpathicConcern_6 + EmpathicConcern_10)
 # IRI Overall Sum
+ending_iri <- ending_iri %>%
+  mutate(IRI_Total = IRI_PT + IRI_FC + IRI_EC + IRI_PD)
+
+beginning_iri <- beginning_iri %>%
+  mutate(IRI_Total = IRI_PT + IRI_FC + IRI_EC + IRI_PD)
