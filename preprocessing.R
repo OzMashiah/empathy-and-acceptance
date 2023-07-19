@@ -12,6 +12,17 @@ beginning<-read_tsv('rawdata\\Beginning Survey_July 2, 2023_04.49.tsv', locale =
 ending<-readr::read_tsv("rawdata\\Ending Survey_July 2, 2023_04.49.tsv", locale = locale(encoding = "UTF-16"))
 daily<-readr::read_tsv("rawdata\\daily survey_July 2, 2023_04.48.tsv", locale = locale(encoding = "UTF-16"))
 
+# convert to numeric.
+ending <- ending %>%
+  mutate(across(starts_with("Nonacceptance"), as.numeric))
+beginning <- beginning %>%
+  mutate(across(starts_with("Nonacceptance"), as.numeric))
+
+ending <- ending %>%
+  mutate(across(starts_with("EmpathicConcern"), as.numeric))
+beginning <- beginning %>%
+  mutate(across(starts_with("EmpathicConcern"), as.numeric))
+
 # Remove duplicate ID except the last occurrence & people who did not finish.
 beginning_unique <- beginning %>%
   group_by(ID) %>%
@@ -20,23 +31,44 @@ beginning_unique <- beginning %>%
 ending_unique <- ending %>%
   group_by(ID) %>%
   filter(row_number() == n() & Progress == 100)
+
+# Fix incorrect scoring in Male-IRI (beginning and ending) and No-Exposure (daily)
+# IRI
+apply_rule_iri <- function(gender, col) {
+  if (gender == 2) {
+    col <- case_when(
+      col == 1 ~ 1,
+      col == 16 ~ 2,
+      col == 2 ~ 3,
+      col == 3 ~ 4,
+      col == 4 ~ 5,
+      TRUE ~ col
+    )
+  }
+  return(col)
+}
+
+columns_to_modify <- grep("^EmpathicConcern", names(beginning), value = TRUE)
+
+beginning_unique <- beginning_unique %>%
+  mutate_at(vars(all_of(columns_to_modify)), ~apply_rule_iri(Gender, .))
+ending_unique <- ending_unique %>%
+  mutate_at(vars(all_of(columns_to_modify)), ~apply_rule_iri(Gender, .))
+
+# daily!!@#!#@!#!#@!#
+#!@#!@#!#
+
   
 # DERS Questionnaire
 # Nonacceptance of emotional responses scale. 3(11), 4(12), 11(21), 12(23), 13(25), 16(29)
 # Non-acceptance M = 14.67, SD = 5.92
 
-# convert to numeric.
-ending_ders <- ending_unique %>%
-  mutate(across(starts_with("Nonacceptance"), as.numeric))
-beginning_ders <- beginning_unique %>%
-  mutate(across(starts_with("Nonacceptance"), as.numeric))
-
 # calculate the nonacceptance scale for the DERS questionnaire.
-ending_ders <- ending_ders %>%
+ending_ders <- ending_unique %>%
   mutate(DERS_NA = Nonacceptance_3 + Nonacceptance_4 + Nonacceptance_11 +
            Nonacceptance_12 + Nonacceptance_13 + Nonacceptance_16)
 
-beginning_ders <- beginning_ders %>%
+beginning_ders <- beginning_unique %>%
   mutate(DERSNA = Nonacceptance_3 + Nonacceptance_4 + Nonacceptance_11 +
            Nonacceptance_12 + Nonacceptance_13 + Nonacceptance_16)
          
@@ -48,19 +80,13 @@ beginning_ders <- beginning_ders %>%
 
 
 # IRI Questionnaire
-# Convert to numeric
-ending_iri <- ending_ders %>%
-  mutate(across(starts_with("EmpathicConcern"), as.numeric))
-
-beginning_iri <- beginning_ders %>%
-  mutate(across(starts_with("EmpathicConcern"), as.numeric))
 # Perspective Taking: 3(3R), 8(8), 11(11), 15(15R), -(21), -(25), -(28)
-ending_iri <- ending_iri %>%
+ending_iri <- ending_ders %>%
   mutate(IRI_PT = recode(EmpathicConcern_3, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            EmpathicConcern_8 + EmpathicConcern_11 +
            recode(EmpathicConcern_15, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
 
-beginning_iri <- beginning_iri %>%
+beginning_iri <- beginning_ders %>%
   mutate(IRI_PT = recode(EmpathicConcern_3, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            EmpathicConcern_8 + EmpathicConcern_11 +
            recode(EmpathicConcern_15, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
