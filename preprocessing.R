@@ -24,7 +24,9 @@ ending_clean <- ending %>%
   filter(row_number() == n() & Progress == 100 & DistributionChannel == "anonymous")
 
 daily_clean <- daily %>%
-  filter(DistributionChannel == "anonymous" & Progress == 100)
+  filter(DistributionChannel == "anonymous" & Progress == 100 &
+           (Q18_5 == 2 | is.na(Q18_5) | Q18_5 == "") &
+           (Q12_5 == 2 | is.na(Q12_5) | Q12_5 == ""))
 
 # convert to numeric.
 ending_clean <- ending_clean %>%
@@ -88,8 +90,8 @@ if (fix_score) {
   daily_clean <- daily_clean %>%
     mutate_at(vars(all_of(columns_to_modify_daily)), ~apply_rule_daily(.))
 
-}
 fix_score = FALSE
+}
 
 # DERS Questionnaire
 # Nonacceptance of emotional responses scale. 3(11), 4(12), 11(21), 12(23), 13(25), 16(29)
@@ -155,4 +157,39 @@ ending_iri <- ending_iri %>%
 beginning_iri <- beginning_iri %>%
   mutate(IRI_Total = IRI_PT + IRI_FC + IRI_EC + IRI_PD)
 
+# Daily Negative Experience Questionnaire.
+daily_scales <- daily_clean %>%
+  mutate(Negative_Total = Q12_1 + Q12_2 + Q12_3 + Q12_4 + Q12_6 + Q12_7 + Q12_8)
+# Daily Positive Experience Questionnaire.
+daily_scales <- daily_scales %>%
+  mutate(Positive_Total = Q18_1 + Q18_2 + Q18_3 + Q18_4 + Q18_6 + Q18_7 + Q18_8)
+# Daily No Exposure Questionnaire.
+daily_scales <- daily_scales %>%
+  mutate(NoExposure_Total = Q2_1 + Q2_2 + Q2_3 + Q2_4 + Q2_5 + Q2_6 + Q2_7 +
+           Q2_8 + Q2_9 + Q2_10 + Q2_11 + Q2_12 + Q2_13 + Q2_14)
 
+# remove subjects that have not done the minimum requirements:
+# 1. done the beginning survey.
+# 2. at least 2 daily surveys.
+# 3. done the ending survey
+daily_twice_ids <- daily_scales %>%
+  group_by(ID) %>%
+  filter(n() >= 2) %>%
+  distinct(ID) %>%
+  pull(ID)
+
+beginning_ending_ids <- beginning_iri %>%
+  semi_join(ending_iri, by = "ID") %>%
+  distinct(ID) %>%
+  pull(ID)
+
+result_ids <- intersect(daily_twice_ids, beginning_ending_ids)
+
+beginning_final <- beginning_iri %>%
+  filter(ID %in% result_ids)
+
+ending_final <- ending_iri %>%
+  filter(ID %in% result_ids)
+
+daily_final <- daily_scales %>%
+  filter(ID %in% result_ids)
