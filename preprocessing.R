@@ -1,5 +1,7 @@
 rm(list = ls()) # remove all variables from environment
 cat("\014") # clean console
+# fix score flag
+fix_score = TRUE
 # import libraries
 library(readr)
 library(dplyr)
@@ -12,63 +14,93 @@ beginning<-read_tsv('rawdata\\Beginning Survey_July 2, 2023_04.49.tsv', locale =
 ending<-readr::read_tsv("rawdata\\Ending Survey_July 2, 2023_04.49.tsv", locale = locale(encoding = "UTF-16"))
 daily<-readr::read_tsv("rawdata\\daily survey_July 2, 2023_04.48.tsv", locale = locale(encoding = "UTF-16"))
 
-# convert to numeric.
-ending <- ending %>%
-  mutate(across(starts_with("Nonacceptance"), as.numeric))
-beginning <- beginning %>%
-  mutate(across(starts_with("Nonacceptance"), as.numeric))
-
-ending <- ending %>%
-  mutate(across(starts_with("EmpathicConcern"), as.numeric))
-beginning <- beginning %>%
-  mutate(across(starts_with("EmpathicConcern"), as.numeric))
-
 # Remove duplicate ID except the last occurrence & people who did not finish.
-beginning_unique <- beginning %>%
+beginning_clean <- beginning %>%
   group_by(ID) %>%
-  filter(row_number() == n() & Progress == 100)
+  filter(row_number() == n() & Progress == 100 & DistributionChannel == "anonymous")
 
-ending_unique <- ending %>%
+ending_clean <- ending %>%
   group_by(ID) %>%
-  filter(row_number() == n() & Progress == 100)
+  filter(row_number() == n() & Progress == 100 & DistributionChannel == "anonymous")
+
+daily_clean <- daily %>%
+  filter(DistributionChannel == "anonymous" & Progress == 100)
+
+# convert to numeric.
+ending_clean <- ending_clean %>%
+  mutate(across(starts_with("Nonacceptance"), as.numeric))
+beginning_clean <- beginning_clean %>%
+  mutate(across(starts_with("Nonacceptance"), as.numeric))
+
+ending_clean <- ending_clean %>%
+  mutate(across(starts_with("EmpathicConcern"), as.numeric))
+beginning_clean <- beginning_clean %>%
+  mutate(across(starts_with("EmpathicConcern"), as.numeric))
+
+# Q12 (negative), Q18 (positive), Q2 (no-exposure)
+daily_clean <- daily_clean %>%
+  mutate(across(starts_with("Q12"), as.numeric))
+daily_clean <- daily_clean %>%
+  mutate(across(starts_with("Q18"), as.numeric))
+daily_clean <- daily_clean %>%
+  mutate(across(starts_with("Q2"), as.numeric))
+
 
 # Fix incorrect scoring in Male-IRI (beginning and ending) and No-Exposure (daily)
 # IRI
-apply_rule_iri <- function(gender, col) {
-  if (gender == 2) {
+if (fix_score) {
+  apply_rule_iri <- function(gender, col) {
+    if (gender == 2) {
+      col <- case_when(
+        col == 1 ~ 1,
+        col == 16 ~ 2,
+        col == 2 ~ 3,
+        col == 3 ~ 4,
+        col == 4 ~ 5,
+        TRUE ~ col
+      )
+    }
+    return(col)
+  }
+
+  columns_to_modify_iri <- grep("^EmpathicConcern", names(beginning_clean), value = TRUE)
+
+  beginning_clean <- beginning_clean %>%
+    mutate_at(vars(all_of(columns_to_modify_iri)), ~apply_rule_iri(Gender, .))
+  ending_clean <- ending_clean %>%
+    mutate_at(vars(all_of(columns_to_modify_iri)), ~apply_rule_iri(Gender, .))
+
+# Daily
+  apply_rule_daily <- function(col) {
     col <- case_when(
-      col == 1 ~ 1,
-      col == 16 ~ 2,
-      col == 2 ~ 3,
-      col == 3 ~ 4,
-      col == 4 ~ 5,
+      col == 2 ~ 1,
+      col == 3 ~ 2,
+      col == 4 ~ 3,
+      col == 5 ~ 4,
+      col == 6 ~ 5,
+      is.na(col) ~ NA_real_,
       TRUE ~ col
     )
+    return(col)
   }
-  return(col)
+  columns_to_modify_daily <- grep("^Q2", names(daily_clean), value = TRUE)
+
+  daily_clean <- daily_clean %>%
+    mutate_at(vars(all_of(columns_to_modify_daily)), ~apply_rule_daily(.))
+
 }
+fix_score = FALSE
 
-columns_to_modify <- grep("^EmpathicConcern", names(beginning), value = TRUE)
-
-beginning_unique <- beginning_unique %>%
-  mutate_at(vars(all_of(columns_to_modify)), ~apply_rule_iri(Gender, .))
-ending_unique <- ending_unique %>%
-  mutate_at(vars(all_of(columns_to_modify)), ~apply_rule_iri(Gender, .))
-
-# daily!!@#!#@!#!#@!#
-#!@#!@#!#
-
-  
 # DERS Questionnaire
 # Nonacceptance of emotional responses scale. 3(11), 4(12), 11(21), 12(23), 13(25), 16(29)
 # Non-acceptance M = 14.67, SD = 5.92
 
 # calculate the nonacceptance scale for the DERS questionnaire.
-ending_ders <- ending_unique %>%
+ending_ders <- ending_clean %>%
   mutate(DERS_NA = Nonacceptance_3 + Nonacceptance_4 + Nonacceptance_11 +
            Nonacceptance_12 + Nonacceptance_13 + Nonacceptance_16)
 
-beginning_ders <- beginning_unique %>%
+beginning_ders <- beginning_clean %>%
   mutate(DERSNA = Nonacceptance_3 + Nonacceptance_4 + Nonacceptance_11 +
            Nonacceptance_12 + Nonacceptance_13 + Nonacceptance_16)
          
@@ -100,14 +132,14 @@ beginning_iri <- beginning_iri %>%
   mutate(IRI_FC = recode(EmpathicConcern_7, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            EmpathicConcern_1 + EmpathicConcern_5 + EmpathicConcern_16 +
            recode(EmpathicConcern_12, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
-# Emphatic Concern: 2(2), 4(4R), 9(9), 14(14), -(18R), -(20), -(22)
+# Emphatic Concern: 2(2), 4(4R only in ending), 9(9), 14(14), -(18R), -(20), -(22)
 ending_iri <- ending_iri %>%
   mutate(IRI_EC = recode(EmpathicConcern_4, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            EmpathicConcern_2 + EmpathicConcern_9 + EmpathicConcern_14)
 
 beginning_iri <- beginning_iri %>%
-  mutate(IRI_EC = recode(EmpathicConcern_4, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
-           EmpathicConcern_2 + EmpathicConcern_9 + EmpathicConcern_14)
+  mutate(IRI_EC = EmpathicConcern_4 + EmpathicConcern_2 + EmpathicConcern_9 +
+           EmpathicConcern_14)
 # Personal Distress: 6(6), 10(10), 13(13R), -(17), -(19R), -(24), -(27)
 ending_iri <- ending_iri %>%
   mutate(IRI_PD = recode(EmpathicConcern_13, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
@@ -122,3 +154,5 @@ ending_iri <- ending_iri %>%
 
 beginning_iri <- beginning_iri %>%
   mutate(IRI_Total = IRI_PT + IRI_FC + IRI_EC + IRI_PD)
+
+
