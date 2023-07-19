@@ -193,3 +193,8 @@ ending_final <- ending_iri %>%
 
 daily_final <- daily_scales %>%
   filter(ID %in% result_ids)
+
+# export to csv
+write_excel_csv(beginning_final, "preprocessed/preprocessed_beginning.csv")
+write_excel_csv(ending_final, "preprocessed/preprocessed_ending.csv")
+write_excel_csv(daily_final, "preprocessed/preprocessed_daily.csv")
