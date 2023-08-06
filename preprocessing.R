@@ -14,14 +14,16 @@ beginning<-read_tsv('rawdata\\Beginning Survey_July 2, 2023_04.49.tsv', locale =
 ending<-readr::read_tsv("rawdata\\Ending Survey_July 2, 2023_04.49.tsv", locale = locale(encoding = "UTF-16"))
 daily<-readr::read_tsv("rawdata\\daily survey_July 2, 2023_04.48.tsv", locale = locale(encoding = "UTF-16"))
 
-# Remove duplicate ID except the last occurrence & people who did not finish.
+# Remove duplicate ID except the first occurrence & people who did not finish.
 beginning_clean <- beginning %>%
   group_by(ID) %>%
-  filter(row_number() == n() & Progress == 100 & DistributionChannel == "anonymous")
+  filter(Progress == 100 & DistributionChannel == "anonymous") %>%
+  filter(row_number() == 1)
 
 ending_clean <- ending %>%
   group_by(ID) %>%
-  filter(row_number() == n() & Progress == 100 & DistributionChannel == "anonymous")
+  filter(Progress == 100 & DistributionChannel == "anonymous") %>%
+  filter(row_number() == 1)
 
 daily_clean <- daily %>%
   filter(DistributionChannel == "anonymous" & Progress == 100 &
