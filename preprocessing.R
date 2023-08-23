@@ -213,6 +213,34 @@ ending_final <- ending_iri %>%
 daily_final <- daily_scales %>%
   filter(ID %in% result_ids)
 
+# create a different row with reversed scores for negatively worded questions
+# for cronbach's alpha.
+ending_final <- ending_final %>%
+  mutate(EmpathicConcern_3_R = recode(EmpathicConcern_3, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+ending_final <- ending_final %>%
+  mutate(EmpathicConcern_4_R = recode(EmpathicConcern_4, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+ending_final <- ending_final %>%
+  mutate(EmpathicConcern_7_R = recode(EmpathicConcern_7, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+ending_final <- ending_final %>%
+  mutate(EmpathicConcern_12_R = recode(EmpathicConcern_12, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+ending_final <- ending_final %>%
+  mutate(EmpathicConcern_13_R = recode(EmpathicConcern_13, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+ending_final <- ending_final %>%
+  mutate(EmpathicConcern_15_R = recode(EmpathicConcern_15, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+
+beginning_final <- beginning_final %>%
+  mutate(EmpathicConcern_3_R = recode(EmpathicConcern_3, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+beginning_final <- beginning_final %>%
+  mutate(EmpathicConcern_7_R = recode(EmpathicConcern_7, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+beginning_final <- beginning_final %>%
+  mutate(EmpathicConcern_12_R = recode(EmpathicConcern_12, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+beginning_final <- beginning_final %>%
+  mutate(EmpathicConcern_13_R = recode(EmpathicConcern_13, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+beginning_final <- beginning_final %>%
+  mutate(EmpathicConcern_15_R = recode(EmpathicConcern_15, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+
+
+
 # export to csv
 write_excel_csv(beginning_final, "preprocessed/preprocessed_beginning.csv")
 write_excel_csv(ending_final, "preprocessed/preprocessed_ending.csv")

@@ -7,20 +7,87 @@ library(hrbrthemes)
 library(gridExtra)
 library(ggpubr)
 library(tidyr)
+library(ltm)
+library(dplyr)
+library(vtable)
+library(PerformanceAnalytics)
+
 
 # set working directory
 setwd("C:/Users/Oz/Documents/Empathy And Acceptance/empathy-and-acceptance/")
 
 # read preprocessed data files
-beginning<-read_csv('preprocessed\\preprocessed_beginning.csv')
+beginning<-readr::read_csv('preprocessed\\preprocessed_beginning.csv')
 ending<-readr::read_csv("preprocessed\\preprocessed_ending.csv")
 daily<-readr::read_csv("preprocessed\\preprocessed_daily.csv")
 
-# descriptive statistics for both questionnaires and each subscale with alpha
+# descriptive statistics for both questionnaires
+combined_data_long <- rbind(mutate(beginning[, c('ID', 'DERS_A', 'IRI_PT',
+                                                 'IRI_FC', 'IRI_EC', 'IRI_PD',
+                                                 'IRI_Total')],
+                                   Group = "Beginning"),
+                            mutate(ending[, c('ID', 'DERS_A', 'IRI_PT',
+                                              'IRI_FC', 'IRI_EC', 'IRI_PD',
+                                              'IRI_Total')],
+                                   Group = "Ending"))
 
+st(combined_data_long[, c('DERS_A', 'IRI_PT', 'IRI_FC', 'IRI_EC', 'IRI_PD',
+                          'IRI_Total', 'Group')],
+   group = 'Group',group.long = TRUE,
+   labels = c('Acceptance', 'Perspective Taking (PT)', 'Fantasy (FS)',
+              'Empathic Concern (EC)', 'Personal Distress (PD)', 'IRI Total'),
+   out = 'kable') %>%
+  kableExtra::kable_classic_2(full_width = F, html_font = "Cambria")
 
-# correlation matrix with all subscales for exploration
-
+# Each subscale Cronbach's alpha
+# maybe add the alpha to the table
+# Perspective Taking: 3(3R), 8(8), 11(11), 15(15R), -(21), -(25), -(28)
+alpha_iri_pt_beginning = cronbach.alpha(beginning[, c('EmpathicConcern_3_R',
+                                            'EmpathicConcern_8',
+                                            'EmpathicConcern_11',
+                                            'EmpathicConcern_15_R')])
+alpha_iri_pt_ending = cronbach.alpha(ending[, c('EmpathicConcern_3_R',
+                                                'EmpathicConcern_8',
+                                                'EmpathicConcern_11',
+                                                'EmpathicConcern_15_R')])
+# Fantasy Scale: 1(1), 5(5), 7(7R), 12(12R), 16(16), -(23), -(26)
+alpha_iri_fs_beginning = cronbach.alpha(beginning[, c('EmpathicConcern_1',
+                                                      'EmpathicConcern_5',
+                                                      'EmpathicConcern_7_R',
+                                                      'EmpathicConcern_12_R')])
+alpha_iri_fs_ending = cronbach.alpha(ending[, c('EmpathicConcern_1',
+                                                'EmpathicConcern_5',
+                                                'EmpathicConcern_7_R',
+                                                'EmpathicConcern_12_R')])
+# Emphatic Concern: 2(2), 4(4R only in ending), 9(9), 14(14), -(18R), -(20), -(22)
+alpha_iri_ec_beginning = cronbach.alpha(beginning[, c('EmpathicConcern_2',
+                                                      'EmpathicConcern_4',
+                                                      'EmpathicConcern_9',
+                                                      'EmpathicConcern_14')])
+alpha_iri_ec_ending = cronbach.alpha(ending[, c('EmpathicConcern_2',
+                                                      'EmpathicConcern_4_R',
+                                                      'EmpathicConcern_9',
+                                                      'EmpathicConcern_14')])
+# Personal Distress: 6(6), 10(10), 13(13R), -(17), -(19R), -(24), -(27)
+alpha_iri_pd_beginning = cronbach.alpha(beginning[, c('EmpathicConcern_6',
+                                                      'EmpathicConcern_10',
+                                                      'EmpathicConcern_13_R')])
+alpha_iri_pd_ending = cronbach.alpha(ending[, c('EmpathicConcern_6',
+                                                'EmpathicConcern_10',
+                                                'EmpathicConcern_13_R')])
+# Nonacceptance of emotional responses scale. 3(11), 4(12), 11(21), 12(23), 13(25), 16(29)
+alpha_ders_a_beginning = cronbach.alpha(beginning[, c('Nonacceptance_3',
+                                                      'Nonacceptance_4',
+                                                      'Nonacceptance_11',
+                                                      'Nonacceptance_12',
+                                                      'Nonacceptance_13',
+                                                      'Nonacceptance_16')])
+alpha_ders_a_ending = cronbach.alpha(ending[, c('Nonacceptance_3',
+                                                'Nonacceptance_4',
+                                                'Nonacceptance_11',
+                                                'Nonacceptance_12',
+                                                'Nonacceptance_13',
+                                                'Nonacceptance_16')])
 
 
 # correlation between empathic concern and acceptance
@@ -62,7 +129,7 @@ grid.arrange(EC1A1, EC2A2, ncol = 2)
 # t-test between before and after daily survey
 # Combine dataframes
 combined_data_wide <- left_join(beginning, ending, by = "ID", suffix = c("_beginning", "_ending")) %>%
-  select(ID, IRI_EC_beginning, DERS_A_beginning, IRI_EC_ending, DERS_A_ending)
+  dplyr::select(ID, IRI_EC_beginning, DERS_A_beginning, IRI_EC_ending, DERS_A_ending)
 combined_data_long <- rbind(mutate(beginning[, c('ID', 'IRI_EC', 'DERS_A')], Group = "Beginning"),
                        mutate(ending[, c('ID', 'IRI_EC', 'DERS_A')], Group = "Ending"))
 
@@ -100,6 +167,32 @@ EC1EC2 <- ggplot(combined_data_long, aes(x = Group, y = IRI_EC, fill = Group)) +
 
 grid.arrange(EC1EC2, A1A2, ncol = 2)
 
+# correlation matrix with all subscales for exploration
+corrmatdf_beg <- beginning %>% 
+  rename(
+    Perspective_Taking = IRI_PT,
+    Fantasy = IRI_FC,
+    Personal_Distress = IRI_PD,
+    Empathic_Concern = IRI_EC,
+    Acceptance = DERS_A
+    )
+
+corrmatdf_end <- ending %>% 
+  rename(
+    Perspective_Taking = IRI_PT,
+    Fantasy = IRI_FC,
+    Personal_Distress = IRI_PD,
+    Empathic_Concern = IRI_EC,
+    Acceptance = DERS_A
+  )
+
+chart.Correlation(corrmatdf_beg[, c('Perspective_Taking', 'Fantasy',
+                                'Personal_Distress', 'Empathic_Concern',
+                                'Acceptance')], histogram=TRUE, pch=19)
+
+chart.Correlation(corrmatdf_end[, c('Perspective_Taking', 'Fantasy',
+                                  'Personal_Distress', 'Empathic_Concern',
+                                  'Acceptance')], histogram=TRUE, pch=19)
 
 # ggpaired plot trying to beautify.
 ordered_long <- combined_data_long %>%
@@ -107,5 +200,21 @@ ordered_long <- combined_data_long %>%
 
 ggpaired(ordered_long, x = "Group", y = "IRI_EC", 
          order = c("Beginning", "Ending"),
-         ylab = "Weight", xlab = "Groups")
+         ylab = "Empathic Concern", xlab = "Group")
 
+ggpaired(ordered_long, x = "Group", y = "DERS_A", 
+         order = c("Beginning", "Ending"),
+         ylab = "Acceptance", xlab = "Group")
+
+# Trying to use ancova with covariate of amount of journals.
+ancova_df <- daily[, c('ID')] %>%
+  group_by(ID)  %>%
+  summarise(count = n()) %>%
+  left_join(beginning[, c('ID', 'IRI_EC', 'DERS_A')], by = "ID") %>%
+  left_join(ending[, c('ID', 'IRI_EC', 'DERS_A')], by = "ID")
+
+library(car)
+ancova_model_ec <- aov(IRI_EC.x ~ count + IRI_EC.y, data = ancova_df)
+Anova(ancova_model_ec, type="III")
+ancova_model_a <- aov(DERS_A.x ~ count + DERS_A.y, data = ancova_df)
+Anova(ancova_model_a, type="III")
