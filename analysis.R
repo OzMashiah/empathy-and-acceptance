@@ -106,7 +106,7 @@ EC1A1 <- ggplot(beginning, aes(x=DERS_A, y=IRI_EC)) +
   ylab("Empathic Concern") +
   theme(axis.title.x = element_text(size=15 ,hjust=0.5)) +
   theme(axis.title.y = element_text(size=15 ,hjust=0.5)) +
-  geom_text(aes(13, 10, label=paste("r = ", format(round(beginning_cor$estimate,
+  geom_text(aes(3.5, 6, label=paste("r = ", format(round(beginning_cor$estimate,
 
                                                                                                                   3), nsmall =3))), size = 7)
 #ending
@@ -120,7 +120,7 @@ EC2A2 <- ggplot(ending, aes(x=DERS_A, y=IRI_EC)) +
   ylab("Empathic Concern") +
   theme(axis.title.x = element_text(size=15 ,hjust=0.5)) +
   theme(axis.title.y = element_text(size=15 ,hjust=0.5)) +
-  geom_text(aes(15, 10, label=paste("r = ", format(round(ending_cor$estimate,
+  geom_text(aes(3.5, 6, label=paste("r = ", format(round(ending_cor$estimate,
                                                          3), nsmall =3))), size = 7)
 
 grid.arrange(EC1A1, EC2A2, ncol = 2)
@@ -143,7 +143,7 @@ A1A2 <- ggplot(combined_data_long, aes(x = Group, y = DERS_A, fill = Group)) +
        y = "Acceptance") +
   theme_minimal() +
   annotate("text",
-           x = 1.5, y = max(combined_data_long$DERS_A)-2,
+           x = 1.5, y = max(combined_data_long$DERS_A)-0.2,
            label = paste("p-value:", format(format(round(t_test_A1A2$p.value,3),
                                                    nsmall = 3))),
            hjust = 0.5, vjust = -0.5,
@@ -159,7 +159,7 @@ EC1EC2 <- ggplot(combined_data_long, aes(x = Group, y = IRI_EC, fill = Group)) +
        y = "Empathic Concern") +
   theme_minimal() +
   annotate("text",
-           x = 1.5, y = max(combined_data_long$IRI_EC)-1,
+           x = 1.5, y = max(combined_data_long$IRI_EC-0.2),
            label = paste("p-value:", format(format(round(t_test_EC1EC2$p.value,3),
                                                    nsmall = 3))),
            hjust = 0.5, vjust = -0.5,
@@ -194,6 +194,7 @@ chart.Correlation(corrmatdf_end[, c('Perspective_Taking', 'Fantasy',
                                   'Personal_Distress', 'Empathic_Concern',
                                   'Acceptance')], histogram=TRUE, pch=19)
 
+# testing more analysis that didnt make it to the official work for now.
 # ggpaired plot trying to beautify.
 ordered_long <- combined_data_long %>%
   arrange(Group, ID) 
