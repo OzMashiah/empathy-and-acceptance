@@ -101,29 +101,29 @@ fix_score = FALSE
 
 # calculate the nonacceptance scale for the DERS questionnaire.
 ending_ders <- ending_clean %>%
-  mutate(DERS_NA = Nonacceptance_3 + Nonacceptance_4 + Nonacceptance_11 +
-           Nonacceptance_12 + Nonacceptance_13 + Nonacceptance_16)
+  mutate(DERS_NA = (Nonacceptance_3 + Nonacceptance_4 + Nonacceptance_11 +
+           Nonacceptance_12 + Nonacceptance_13 + Nonacceptance_16)/6)
 
 beginning_ders <- beginning_clean %>%
-  mutate(DERSNA = Nonacceptance_3 + Nonacceptance_4 + Nonacceptance_11 +
-           Nonacceptance_12 + Nonacceptance_13 + Nonacceptance_16)
+  mutate(DERSNA = (Nonacceptance_3 + Nonacceptance_4 + Nonacceptance_11 +
+           Nonacceptance_12 + Nonacceptance_13 + Nonacceptance_16)/6)
 
 # calculate the acceptance scale for the DERS questionnaire (inverse of nonacceptance)
 ending_ders <- ending_ders %>%
-  mutate(DERS_A = recode(Nonacceptance_3, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+  mutate(DERS_A = (recode(Nonacceptance_3, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            recode(Nonacceptance_4, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            recode(Nonacceptance_11, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            recode(Nonacceptance_12, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            recode(Nonacceptance_13, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
-           recode(Nonacceptance_16, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+           recode(Nonacceptance_16, `1` = 5, `2` = 4, `4` = 2, `5` = 1))/6)
 
 beginning_ders <- beginning_ders %>%
-  mutate(DERS_A = recode(Nonacceptance_3, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+  mutate(DERS_A = (recode(Nonacceptance_3, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            recode(Nonacceptance_4, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            recode(Nonacceptance_11, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            recode(Nonacceptance_12, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            recode(Nonacceptance_13, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
-           recode(Nonacceptance_16, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+           recode(Nonacceptance_16, `1` = 5, `2` = 4, `4` = 2, `5` = 1))/6)
          
 # Difficulty engaging in goal-directed behavior scale. 5(13), 9(18), -(20R), -(26), 18(33)
 # Impulse control difficulties: -(3), 6(14), 10(19), -(24R), 14(27), -(32)
@@ -135,57 +135,57 @@ beginning_ders <- beginning_ders %>%
 # IRI Questionnaire
 # Perspective Taking: 3(3R), 8(8), 11(11), 15(15R), -(21), -(25), -(28)
 ending_iri <- ending_ders %>%
-  mutate(IRI_PT = recode(EmpathicConcern_3, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+  mutate(IRI_PT = (recode(EmpathicConcern_3, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            EmpathicConcern_8 + EmpathicConcern_11 +
-           recode(EmpathicConcern_15, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+           recode(EmpathicConcern_15, `1` = 5, `2` = 4, `4` = 2, `5` = 1))/4)
 
 beginning_iri <- beginning_ders %>%
-  mutate(IRI_PT = recode(EmpathicConcern_3, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+  mutate(IRI_PT = (recode(EmpathicConcern_3, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            EmpathicConcern_8 + EmpathicConcern_11 +
-           recode(EmpathicConcern_15, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+           recode(EmpathicConcern_15, `1` = 5, `2` = 4, `4` = 2, `5` = 1))/4)
 # Fantasy Scale: 1(1), 5(5), 7(7R), 12(12R), 16(16), -(23), -(26)
 ending_iri <- ending_iri %>%
-  mutate(IRI_FC = recode(EmpathicConcern_7, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+  mutate(IRI_FC = (recode(EmpathicConcern_7, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            EmpathicConcern_1 + EmpathicConcern_5 + EmpathicConcern_16 +
-           recode(EmpathicConcern_12, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+           recode(EmpathicConcern_12, `1` = 5, `2` = 4, `4` = 2, `5` = 1))/5)
 
 beginning_iri <- beginning_iri %>%
-  mutate(IRI_FC = recode(EmpathicConcern_7, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+  mutate(IRI_FC = (recode(EmpathicConcern_7, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
            EmpathicConcern_1 + EmpathicConcern_5 + EmpathicConcern_16 +
-           recode(EmpathicConcern_12, `1` = 5, `2` = 4, `4` = 2, `5` = 1))
+           recode(EmpathicConcern_12, `1` = 5, `2` = 4, `4` = 2, `5` = 1))/5)
 # Emphatic Concern: 2(2), 4(4R only in ending), 9(9), 14(14), -(18R), -(20), -(22)
 ending_iri <- ending_iri %>%
-  mutate(IRI_EC = recode(EmpathicConcern_4, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
-           EmpathicConcern_2 + EmpathicConcern_9 + EmpathicConcern_14)
+  mutate(IRI_EC = (recode(EmpathicConcern_4, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+           EmpathicConcern_2 + EmpathicConcern_9 + EmpathicConcern_14)/4)
 
 beginning_iri <- beginning_iri %>%
-  mutate(IRI_EC = EmpathicConcern_4 + EmpathicConcern_2 + EmpathicConcern_9 +
-           EmpathicConcern_14)
+  mutate(IRI_EC = (EmpathicConcern_4 + EmpathicConcern_2 + EmpathicConcern_9 +
+           EmpathicConcern_14)/4)
 # Personal Distress: 6(6), 10(10), 13(13R), -(17), -(19R), -(24), -(27)
 ending_iri <- ending_iri %>%
-  mutate(IRI_PD = recode(EmpathicConcern_13, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
-           EmpathicConcern_6 + EmpathicConcern_10)
+  mutate(IRI_PD = (recode(EmpathicConcern_13, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+           EmpathicConcern_6 + EmpathicConcern_10)/3)
 
 beginning_iri <- beginning_iri %>%
-  mutate(IRI_PD = recode(EmpathicConcern_13, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
-           EmpathicConcern_6 + EmpathicConcern_10)
+  mutate(IRI_PD = (recode(EmpathicConcern_13, `1` = 5, `2` = 4, `4` = 2, `5` = 1) +
+           EmpathicConcern_6 + EmpathicConcern_10)/3)
 # IRI Overall Sum
 ending_iri <- ending_iri %>%
-  mutate(IRI_Total = IRI_PT + IRI_FC + IRI_EC + IRI_PD)
+  mutate(IRI_Total = (IRI_PT + IRI_FC + IRI_EC + IRI_PD)/4)
 
 beginning_iri <- beginning_iri %>%
-  mutate(IRI_Total = IRI_PT + IRI_FC + IRI_EC + IRI_PD)
+  mutate(IRI_Total = (IRI_PT + IRI_FC + IRI_EC + IRI_PD)/4)
 
 # Daily Negative Experience Questionnaire.
 daily_scales <- daily_clean %>%
-  mutate(Negative_Total = Q12_1 + Q12_2 + Q12_3 + Q12_4 + Q12_6 + Q12_7 + Q12_8)
+  mutate(Negative_Total = (Q12_1 + Q12_2 + Q12_3 + Q12_4 + Q12_6 + Q12_7 + Q12_8)/7)
 # Daily Positive Experience Questionnaire.
 daily_scales <- daily_scales %>%
-  mutate(Positive_Total = Q18_1 + Q18_2 + Q18_3 + Q18_4 + Q18_6 + Q18_7 + Q18_8)
+  mutate(Positive_Total = (Q18_1 + Q18_2 + Q18_3 + Q18_4 + Q18_6 + Q18_7 + Q18_8)/7)
 # Daily No Exposure Questionnaire.
 daily_scales <- daily_scales %>%
-  mutate(NoExposure_Total = Q2_1 + Q2_2 + Q2_3 + Q2_4 + Q2_5 + Q2_6 + Q2_7 +
-           Q2_8 + Q2_9 + Q2_10 + Q2_11 + Q2_12 + Q2_13 + Q2_14)
+  mutate(NoExposure_Total = (Q2_1 + Q2_2 + Q2_3 + Q2_4 + Q2_5 + Q2_6 + Q2_7 +
+           Q2_8 + Q2_9 + Q2_10 + Q2_11 + Q2_12 + Q2_13 + Q2_14)/14)
 
 # remove subjects that have not done the minimum requirements:
 # 1. done the beginning survey.
