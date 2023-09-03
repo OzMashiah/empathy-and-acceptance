@@ -12,7 +12,6 @@ library(dplyr)
 library(vtable)
 library(PerformanceAnalytics)
 
-
 # set working directory
 setwd("C:/Users/Oz/Documents/Empathy And Acceptance/empathy-and-acceptance/")
 
@@ -31,6 +30,7 @@ combined_data_long <- rbind(mutate(beginning[, c('ID', 'DERS_A', 'IRI_PT',
                                               'IRI_Total')],
                                    Group = "Ending"))
 
+# The following line will display the Descriptive Statistics table.
 st(combined_data_long[, c('DERS_A', 'IRI_PT', 'IRI_FC', 'IRI_EC', 'IRI_PD',
                           'IRI_Total', 'Group')],
    group = 'Group',group.long = TRUE,
@@ -123,6 +123,7 @@ EC2A2 <- ggplot(ending, aes(x=DERS_A, y=IRI_EC)) +
   geom_text(aes(3.5, 6, label=paste("r = ", format(round(ending_cor$estimate,
                                                          3), nsmall =3))), size = 7)
 
+# The following line will display the correlation lines between A and EC.
 grid.arrange(EC1A1, EC2A2, ncol = 2)
 
 
@@ -165,6 +166,7 @@ EC1EC2 <- ggplot(combined_data_long, aes(x = Group, y = IRI_EC, fill = Group)) +
            hjust = 0.5, vjust = -0.5,
            size = 4, color = "black") 
 
+# The following line will display the boxplots of before and after daily journals.
 grid.arrange(EC1EC2, A1A2, ncol = 2)
 
 # correlation matrix with all subscales for exploration
@@ -186,6 +188,7 @@ corrmatdf_end <- ending %>%
     Acceptance = DERS_A
   )
 
+# The next two lines will display the correlation matrices.
 chart.Correlation(corrmatdf_beg[, c('Perspective_Taking', 'Fantasy',
                                 'Personal_Distress', 'Empathic_Concern',
                                 'Acceptance')], histogram=TRUE, pch=19)
@@ -194,28 +197,9 @@ chart.Correlation(corrmatdf_end[, c('Perspective_Taking', 'Fantasy',
                                   'Personal_Distress', 'Empathic_Concern',
                                   'Acceptance')], histogram=TRUE, pch=19)
 
-# testing more analysis that didnt make it to the official work for now.
-# ggpaired plot trying to beautify.
-ordered_long <- combined_data_long %>%
-  arrange(Group, ID) 
-
-ggpaired(ordered_long, x = "Group", y = "IRI_EC", 
-         order = c("Beginning", "Ending"),
-         ylab = "Empathic Concern", xlab = "Group")
-
-ggpaired(ordered_long, x = "Group", y = "DERS_A", 
-         order = c("Beginning", "Ending"),
-         ylab = "Acceptance", xlab = "Group")
-
 # Trying to use ancova with covariate of amount of journals.
 ancova_df <- daily[, c('ID')] %>%
   group_by(ID)  %>%
   summarise(count = n()) %>%
   left_join(beginning[, c('ID', 'IRI_EC', 'DERS_A')], by = "ID") %>%
   left_join(ending[, c('ID', 'IRI_EC', 'DERS_A')], by = "ID")
-
-library(car)
-ancova_model_ec <- aov(IRI_EC.x ~ count + IRI_EC.y, data = ancova_df)
-Anova(ancova_model_ec, type="III")
-ancova_model_a <- aov(DERS_A.x ~ count + DERS_A.y, data = ancova_df)
-Anova(ancova_model_a, type="III")
