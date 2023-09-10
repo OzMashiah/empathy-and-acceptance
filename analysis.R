@@ -136,7 +136,8 @@ combined_data_long <- rbind(mutate(beginning[, c('ID', 'IRI_EC', 'DERS_A')], Gro
 
 # Acceptance before after
 t_test_A1A2 <- t.test(combined_data_wide$DERS_A_beginning,
-                      combined_data_wide$DERS_A_ending, paired = TRUE)
+                      combined_data_wide$DERS_A_ending, paired = TRUE,
+                      alternative = "less")
 A1A2 <- ggplot(combined_data_long, aes(x = Group, y = DERS_A, fill = Group)) +
   geom_boxplot() +
   labs(title = "Acceptance before and after Daily Journal",
@@ -152,7 +153,8 @@ A1A2 <- ggplot(combined_data_long, aes(x = Group, y = DERS_A, fill = Group)) +
 
 # Empathy before after
 t_test_EC1EC2 <- t.test(combined_data_wide$IRI_EC_beginning,
-                        combined_data_wide$IRI_EC_ending, paired = TRUE)
+                        combined_data_wide$IRI_EC_ending, paired = TRUE, 
+                        alternative = "less")
 EC1EC2 <- ggplot(combined_data_long, aes(x = Group, y = IRI_EC, fill = Group)) +
   geom_boxplot() +
   labs(title = "Empathic Concern before and after Daily Journal",
